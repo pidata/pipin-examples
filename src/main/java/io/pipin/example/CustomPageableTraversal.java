@@ -1,8 +1,7 @@
 package io.pipin.example;
 
 import akka.actor.ActorSystem;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
+import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import io.pipin.core.poll.SimpleTraversal;
 import io.pipin.core.poll.TokenAuthorizator;
@@ -34,7 +33,7 @@ public class CustomPageableTraversal extends SimpleTraversal {
     @Override
     public String getBody(Map<String,String> extraParamsMap) {
         return "{\n" +
-                "  \"_projectId\": \""+extraParamsMap.get("projectId")+"\",\n" +
+                "  \"_projectId\": \""+extraParamsMap.get("_projectId")+"\",\n" +
                 "  \"pageToken\": \""+pageToken+"\",\n" +
                 "  \"pageSize\": 1000\n" +
                 "}";
@@ -109,7 +108,7 @@ public class CustomPageableTraversal extends SimpleTraversal {
     @Override
     public Map<String, String>[] extraParamsBatch() {
         ArrayList<Map<String, String>> batch = new ArrayList<>();
-        MongoClient mongoClient = MongoClients.create("mongodb://localhost");
+        MongoClient mongoClient = new  MongoClient("localhost", 27017);
         MongoDatabase database = mongoClient.getDatabase("pipin");
         database.getCollection("project").find().forEach((Consumer<Document>) document -> {
             Map<String,String> result = new HashMap<>(1);
@@ -118,6 +117,6 @@ public class CustomPageableTraversal extends SimpleTraversal {
             batch.add(result);
         });
 
-        return (Map<String, String>[])batch.toArray();
+        return (Map<String, String>[])batch.toArray(new Map[0]);
     }
 }
